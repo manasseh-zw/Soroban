@@ -13,5 +13,7 @@ struct SorobanApp: App {
         WindowGroup {
             ContentView()
         }
+        .defaultSize(width: 700, height: 500)
+        .windowResizability(.contentSize)
     }
 }
