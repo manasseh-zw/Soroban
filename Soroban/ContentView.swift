@@ -11,10 +11,13 @@ struct ContentView: View {
     @State private var heavenBeads: [Bool] = Array(repeating: false, count: 13)
     @State private var earthBeads: [[Bool]] = Array(repeating: Array(repeating: false, count: 4), count: 13)
     
-    private var totalValue: Int {
-        var total = 0
+    private let unitRodIndex = 6
+    
+    private var totalValue: Double {
+        var total = 0.0
         for i in 0..<13 {
-            let placeValue = Int(pow(10.0, Double(12 - i)))
+            let exponent = unitRodIndex - i
+            let placeValue = pow(10.0, Double(exponent))
             if heavenBeads[i] {
                 total += 5 * placeValue
             }
@@ -36,8 +39,8 @@ struct ContentView: View {
             
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(red: 0.157, green: 0.157, blue: 0.157)) // #282828 background
-
+                    .fill(Color(nsColor: .windowBackgroundColor))
+                
                 HStack(spacing: 0) {
                     ForEach(0..<13, id: \.self) { rodIndex in
                         RodView(
@@ -64,10 +67,13 @@ struct ContentView: View {
         .frame(width: 700, height: 500)
     }
     
-    private func formatNumber(_ number: Int) -> String {
+    private func formatNumber(_ number: Double) -> String {
+        let rounded = (number * 1_000_000).rounded() / 1_000_000
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        return formatter.string(from: NSNumber(value: number)) ?? "0"
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 6
+        return formatter.string(from: NSNumber(value: rounded)) ?? "0"
     }
 }
 
@@ -96,7 +102,7 @@ struct RodView: View {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(Color(red: 0.8, green: 0.8, blue: 0.85)) // White metallic rod
                     .frame(width: 4, height: rodBottomY)
-
+                
                 // Dividing bar
                 RoundedRectangle(cornerRadius: 1)
                     .fill(Color(red: 0.6, green: 0.6, blue: 0.65).opacity(0.3)) // See-through silver bar
@@ -157,7 +163,7 @@ struct RodView: View {
 
 struct BeadView: View {
     let color: Color
-
+    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12)
@@ -175,7 +181,7 @@ struct BeadView: View {
                 )
                 .frame(width: 32, height: 16)
                 .offset(y: -6)
-
+            
             // Secondary highlight
             RoundedRectangle(cornerRadius: 6)
                 .fill(
@@ -187,7 +193,7 @@ struct BeadView: View {
                 )
                 .frame(width: 20, height: 8)
                 .offset(x: -6, y: -8)
-
+            
             // Inner shadow effect for depth
             RoundedRectangle(cornerRadius: 11.5)
                 .stroke(
