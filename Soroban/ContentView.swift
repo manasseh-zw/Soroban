@@ -8,10 +8,23 @@
 import SwiftUI
 
 struct ContentView: View {
+    enum PlaceValueMode: String {
+        case rightmostUnits
+        case centerUnits
+    }
+    
     @State private var heavenBeads: [Bool] = Array(repeating: false, count: 13)
     @State private var earthBeads: [[Bool]] = Array(repeating: Array(repeating: false, count: 4), count: 13)
+    @State private var placeValueMode: PlaceValueMode = .centerUnits
     
-    private let unitRodIndex = 6
+    private var unitRodIndex: Int {
+        switch placeValueMode {
+        case .rightmostUnits:
+            return heavenBeads.count - 1
+        case .centerUnits:
+            return heavenBeads.count / 2
+        }
+    }
     
     private var totalValue: Double {
         var total = 0.0
@@ -53,14 +66,26 @@ struct ContentView: View {
                 .padding(.vertical, 8)
             }
             
-            Button("Clear") {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    heavenBeads = Array(repeating: false, count: 13)
-                    earthBeads = Array(repeating: Array(repeating: false, count: 4), count: 13)
+            HStack {
+                Button("Clear") {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        heavenBeads = Array(repeating: false, count: 13)
+                        earthBeads = Array(repeating: Array(repeating: false, count: 4), count: 13)
+                    }
                 }
+                .buttonStyle(.plain)
+                .foregroundColor(.white)
+                
+                Spacer()
+                
+                Toggle(isOn: Binding(
+                    get: { placeValueMode == .centerUnits },
+                    set: { placeValueMode = $0 ? .centerUnits : .rightmostUnits }
+                )) {
+                    Text("Use decimals")
+                }
+                .toggleStyle(.switch)
             }
-            .buttonStyle(.plain)
-            .foregroundColor(.white)
             .padding(.top, 28)
         }
         .padding(24)
@@ -72,7 +97,7 @@ struct ContentView: View {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 6
+        formatter.maximumFractionDigits = placeValueMode == .centerUnits ? 6 : 0
         return formatter.string(from: NSNumber(value: rounded)) ?? "0"
     }
 }
